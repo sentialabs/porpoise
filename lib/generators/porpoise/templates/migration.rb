@@ -1,4 +1,8 @@
 class PorpoiseCreateKeyValueObjects < ActiveRecord::Migration
+  def connection
+    ActiveRecord::Base.establish_connection("porpoise_#{Rails.env}").connection
+  end
+
   def change
     create_table :key_value_objects, id: false do |t|
       t.string :key, null: false
