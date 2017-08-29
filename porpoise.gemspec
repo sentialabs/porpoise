@@ -33,4 +33,5 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'mysql2', '~> 0.3.20'
   spec.add_dependency 'activerecord'
+  spec.add_dependency "rails", '~> 3.2'
 end
