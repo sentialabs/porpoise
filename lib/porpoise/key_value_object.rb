@@ -5,7 +5,8 @@ class KeyValueObject < ActiveRecord::Base
     end
   end
   
-  establish_connection :porpoise
+  config = YAML.load(File.read('config/database.yml'))
+  establish_connection config["porpoise_#{Rails.env}"]
 
   serialize :value
 
