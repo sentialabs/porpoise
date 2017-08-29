@@ -1,3 +1,4 @@
+require 'thor'
 require 'rails/generators'
 
 module Porpoise
