@@ -1,9 +1,10 @@
-require 'thor'
 require 'rails/generators'
 
 module Porpoise
   module Generators
     class InstallGenerator < Rails::Generators::Base
+      require 'thor'
+
       source_root File.expand_path("../templates", __FILE__)
 
       copy_file "migration.rb", "db/migrate/porpoise_create_key_value_objects.rb"
