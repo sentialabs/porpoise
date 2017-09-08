@@ -18,10 +18,9 @@ class Porpoise::KeyValueObject < ActiveRecord::Base
 
   attr_accessible :key, :value, :data_type, :expiration_date
 
-  before_validation :set_data_type, on: :create
+  before_validation :set_data_type
 
   validates_inclusion_of :data_type, in: %w(String Hash Array)
-  validate :validate_data_type, on: :update
 
   private
 
@@ -29,10 +28,6 @@ class Porpoise::KeyValueObject < ActiveRecord::Base
     if !self.data_type.nil? && self.value.class.name != self.data_type
       raise Porpoise::TypeMismatch.new("#{self.value.class.name} is not of type #{self.data_type}")
     end
-  end
-
-  def validate_data_type
-    self.errors.add(:data_type, "does not match the data type of the object (#{self.value.class.name})")
   end
 
   def set_data_type
