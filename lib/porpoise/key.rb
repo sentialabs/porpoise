@@ -5,7 +5,7 @@ module Porpoise
         o = find_stored_object(key)
         aff = 0
 
-        unless o.nil
+        unless o.nil?
           o.delete
           aff += 1
         end 
