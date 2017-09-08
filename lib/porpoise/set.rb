@@ -155,7 +155,7 @@ module Porpoise
 
       private
       
-      def find_stored_object(key, raise_on_not_found = true)
+      def find_stored_object(key, raise_on_not_found = false)
         o = KeyValueObject.where(key: key).first
         
         if raise_on_not_found
