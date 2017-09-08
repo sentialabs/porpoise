@@ -4,28 +4,22 @@ require "active_record"
 require "active_support"
 require "mysql2"
 
+# Porpoise specific
 require "porpoise/key_value_object"
-require "active_support/cache/porpoise_store"
-
-# Utilities
 require "porpoise/util"
 require "porpoise/key"
-
-# Datatypes
 require "porpoise/string"
 require "porpoise/hash"
 require "porpoise/set"
+require "active_support/cache/porpoise_store"
 
 module Porpoise
   class << self
     def with_namespace(namespace)
       Thread.current[:namespace] = namespace.to_s
-      
       res = yield
-      
       Thread.current[:namespace] = nil
-      
-      return res
+      res
     end
 
     def namespace
