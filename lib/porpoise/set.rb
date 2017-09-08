@@ -97,7 +97,7 @@ module Porpoise
 
     def spop(key, count = 1)
       o = find_stored_object(key)
-      return nil o.new_record?
+      return nil if o.new_record?
       pd = o.value.dup.shuffle.pop(count)
 
       o.value = o.value.reject { |v| pd.include?(v) }
