@@ -10,7 +10,7 @@ Redis outperforms this implementation by a long shot :p I don't think I have to 
 
 ### Then why?
 
-To simplify your stack? To get a real multi-master setup using MySQL/Galera? To get rid of the the shaky dynomite cluster we had?
+To simplify your stack? To get a real multi-master setup using MySQL/Galera? To get rid of an unstable situation?
 
 This gem was written out of the need to get rid of our shaky Redis Dynomite cluster which we implemented due to the requirement of having actual multi-master clusters. Master-slave- and failover setups tend to break over time, so multi-master is our way to go.
 

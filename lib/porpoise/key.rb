@@ -26,7 +26,7 @@ module Porpoise
         o = find_stored_object(key)
         return nil if o.nil?
 
-        o.value.to_json
+        Marshal.dump(o.value)
       end
 
       def exists(key, *other_keys)

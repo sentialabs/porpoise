@@ -61,20 +61,20 @@ module ActiveSupport
 
       def read(name, options = nil)
         val = Porpoise.with_namespace(@namespace) { Porpoise::String.get(name) }
-        return val.nil? ? nil : JSON.decode(val)
+        return val.nil? ? nil : Marshal.load(val)
       end
 
       def read_multi(*names)
         result = {}
         names.each do |name|
           val = Porpoise.with_namespace(@namespace) { Porpoise::String.get(name) }
-          result[name] = val.nil? ? nil : JSON.decode(val)
+          result[name] = val.nil? ? nil : Marshal.load(val)
         end
         return result
       end
 
       def write(name, value, options = nil)
-        Porpoise.with_namespace(@namespace) { Porpoise::String.set(name, value.to_json) }
+        Porpoise.with_namespace(@namespace) { Porpoise::String.set(name, Marshal.dump(value)) }
       end
     end
   end
