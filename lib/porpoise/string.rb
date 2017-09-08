@@ -30,10 +30,10 @@ module Porpoise
       o.value
     end
 
-    def getrange(key, start, end)
+    def getrange(key, first, last)
       o = find_stored_object(key)
       return nil if o.new_record?
-      o.value[start..end]
+      o.value[last..first]
     end
 
     def getset(key, value)
