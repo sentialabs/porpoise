@@ -11,6 +11,8 @@ class Porpoise::KeyValueObject < ActiveRecord::Base
     end
   end
 
+  self.primary_key = 'key'
+
   config = YAML.load(File.read('config/database.yml'))
   establish_connection config["porpoise_#{Rails.env}"]
 
@@ -28,7 +30,7 @@ class Porpoise::KeyValueObject < ActiveRecord::Base
     if !self.data_type.nil? && self.value.class.name != self.data_type
       raise Porpoise::TypeMismatch.new("#{self.value.class.name} is not of type #{self.data_type}")
     end
-  end
+  end   
 
   def set_data_type
     self.data_type = self.value.class.name
