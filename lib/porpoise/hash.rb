@@ -100,11 +100,10 @@ module Porpoise
       private
 
       def find_stored_object(key, raise_on_not_found = false)
-        o = Porpoise::KeyValueObject.where(key: key).first
+        o = Porpoise::KeyValueObject.where(key: key, data_type: 'Hash').first
         
         if raise_on_not_found
           raise Porpoise::KeyNotFound.new("Key #{key} could not be found") if o.nil?
-          raise Porpoise::TypeMismatch.new("Key #{key} is not a hash") unless o.value.is_a?(::Hash)
         elsif o.nil?
           o = Porpoise::KeyValueObject.new(key: key, value: ::Hash.new)
         end

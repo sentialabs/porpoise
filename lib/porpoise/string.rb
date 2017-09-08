@@ -126,11 +126,10 @@ module Porpoise
       private
       
       def find_stored_object(key, raise_on_not_found = false)
-        o = Porpoise::KeyValueObject.where(key: key).first
+        o = Porpoise::KeyValueObject.where(key: key, data_type: 'String').first
         
         if raise_on_not_found
           raise Porpoise::KeyNotFound.new("Key #{key} could not be found") if o.nil?
-          raise Porpoise::TypeMismatch.new("Key #{key} is not a string") unless o.value.is_a?(::String)
         elsif o.nil?
           o = Porpoise::KeyValueObject.new(key: key, value: ::String.new)
         end
