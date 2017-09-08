@@ -4,15 +4,17 @@ module ActiveSupport
       attr_reader :namespace
 
       def initialize(options = {})
-        @namespace = options.fetch(:namespace, "").to_s
+        @namespace = options.fetch(:namespace, "active-support-cache").to_s
       end
 
       def cleanup(options = nil)
-        Porpoise::KeyValueObject.where(["expiration_date IS NOT NULL AND expiration_date < ?", Time.now]).delete_all
+        Porpoise::KeyValueObject.where(["`key` LIKE ?", "#{@namespace}:%"]).
+                                 where(["expiration_date IS NOT NULL AND expiration_date < ?", Time.now]).
+                                 delete_all
       end
 
       def clear(options = nil)
-        Porpoise::KeyValueObject.delete_all
+        Porpoise::KeyValueObject.where(["`key` LIKE ?", "#{@namespace}:%"]).delete_all
       end
 
       def decrement(name, amount, options = nil)
