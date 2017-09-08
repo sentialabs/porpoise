@@ -1,6 +1,12 @@
 module ActiveSupport
   module Cache
     class PorpoiseStore < Store
+      attr_reader :namespace
+
+      def initialize(options = {})
+        @namespace = options.fetch(:namespace, "").to_s
+      end
+
       def cleanup(options = nil)
         Porpoise::KeyValueObject.where(["expiration_date IS NOT NULL AND expiration_date < ?", Time.now]).delete_all
       end
@@ -10,19 +16,19 @@ module ActiveSupport
       end
 
       def decrement(name, amount, options = nil)
-        Porpoise::String.decrby(name, amount)
+        Porpoise.with_namespace(@namespace) { Porpoise::String.decrby(name, amount) }
       end
 
       def delete(name, options = nil)
-        Porpoise::Key.del(name)
+        Porpoise.with_namespace(@namespace) { Porpoise::Key.del(name) }
       end
 
       def delete_matched(matcher, options = nil)
-        Porpoise::Key.del_matched(matcher)
+        Porpoise.with_namespace(@namespace) { Porpoise::Key.del_matched(matcher) }
       end
 
       def exists?(name, options = nil)
-        Porpoise::Key.exists(name)
+        Porpoise.with_namespace(@namespace) { Porpoise::Key.exists(name) }
       end
 
       def fetch(name, options = nil)
@@ -50,25 +56,25 @@ module ActiveSupport
       end
 
       def increment(name, amount, options = nil)
-        Porpoise::String.incrby(name, amount)
+        Porpoise.with_namespace(@namespace) { Porpoise::String.incrby(name, amount) }
       end
 
       def read(name, options = nil)
-        val = Porpoise::String.get(name)
+        val = Porpoise.with_namespace(@namespace) { Porpoise::String.get(name) }
         return val.nil? ? nil : JSON.decode(val)
       end
 
       def read_multi(*names)
         result = {}
         names.each do |name|
-          val = Porpoise::String.get(name)
+          val = Porpoise.with_namespace(@namespace) { Porpoise::String.get(name) }
           result[name] = val.nil? ? nil : JSON.decode(val)
         end
         return result
       end
 
       def write(name, value, options = nil)
-        Porpoise::String.set(name, value.to_json)
+        Porpoise.with_namespace(@namespace) { Porpoise::String.set(name, value.to_json) }
       end
     end
   end
