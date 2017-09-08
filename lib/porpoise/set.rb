@@ -18,8 +18,9 @@ module Porpoise
       def sdiff(key, *other_keys)
         o = find_stored_object(key)
         current_set = o.value
+        other_keys = other_keys.map { |k| Porpoise::key_with_namespace(k) }
 
-        oo = Porpoise::KeyValueObject.where(key: other_keys.map { |k| Porpoise::key_with_namespace(k) }).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           next unless oo.has_key?(ok)
           current_set = current_set - oo[ok].value
@@ -29,9 +30,10 @@ module Porpoise
 
       def sdiffstore(destination, key, *other_keys)
         o = find_stored_object(key)
-        
         current_set = o.value
-        oo = Porpoise::KeyValueObject.where(key: other_keys.map { |k| Porpoise::key_with_namespace(k) }).all.index_by(&:key)
+        other_keys = other_keys.map { |k| Porpoise::key_with_namespace(k) }
+
+        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           next unless oo.has_key?(ok)
           current_set = current_set - oo[ok].value
@@ -46,8 +48,9 @@ module Porpoise
       def sinter(key, *other_keys)
         o = find_stored_object(key)
         current_set = o.value
+        other_keys = other_keys.map { |k| Porpoise::key_with_namespace(k) }
 
-        oo = Porpoise::KeyValueObject.where(key: other_key.map { |k| Porpoise::key_with_namespace(k) }s).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.where(other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           next unless oo.has_key?(ok)
           current_set = current_set & oo[ok].value
@@ -57,9 +60,10 @@ module Porpoise
 
       def sinterstore(destination, key, *other_keys)
         o = find_stored_object(key)
-        
         current_set = o.value
-        oo = Porpoise::KeyValueObject.where(key: other_keys.map { |k| Porpoise::key_with_namespace(k) }).all.index_by(&:key)
+        other_keys = other_keys.map { |k| Porpoise::key_with_namespace(k) }
+
+        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           next unless oo.has_key?(ok)
           current_set = current_set & oo[ok].value
@@ -128,8 +132,9 @@ module Porpoise
       def sunion(keys, *other_keys)
         o = find_stored_object(key)
         current_set = o.value.dup
+        other_keys = other_keys.map { |k| Porpoise::key_with_namespace(k) }
 
-        oo = Porpoise::KeyValueObject.where(key: other_keys.map { |k| Porpoise::key_with_namespace(k) }).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           next unless oo.has_key?(ok)
           current_set.concat(oo[ok].value)
@@ -139,9 +144,10 @@ module Porpoise
 
       def sunionstore(destination, key, *other_keys)
         o = find_stored_object(key)
-        
         current_set = o.value
-        oo = Porpoise::KeyValueObject.where(key: other_keys.map { |k| Porpoise::key_with_namespace(k) }).all.index_by(&:key)
+        other_keys = other_keys.map { |k| Porpoise::key_with_namespace(k) }
+
+        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           next unless oo.has_key?(ok)
           current_set = current_set.concat(oo[ok].value)

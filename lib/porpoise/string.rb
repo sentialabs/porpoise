@@ -67,8 +67,9 @@ module Porpoise
       def mget(key, *other_keys)
         o = find_stored_object(key)
         values = o.new_record? ? [nil] : o.value
+        other_keys = other_keys.map { |k| Porpoise::key_with_namespace(k) }
 
-        oo = Porpoise::KeyValueObject.where(key: other_key.map { |k| Porpoise::key_with_namespace(k) }s).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           values << oo.has_key?(ok) ? oo[k].value : nil
         end
