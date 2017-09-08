@@ -26,16 +26,16 @@ class Porpoise::KeyValueObject < ActiveRecord::Base
   private
 
   def after_initialize
-    if !data_type.nil? && @value.class.name != @data_type
-      raise Porpoise::TypeMismatch.new("#{@value.class.name} is not of type #{@data_type}")
+    if !self.data_type.nil? && self.value.class.name != self.data_type
+      raise Porpoise::TypeMismatch.new("#{self.value.class.name} is not of type #{self.data_type}")
     end
   end
 
   def validate_data_type
-    self.errors.add(:data_type, "does not match the data type of the object (#{@value.class.name})")
+    self.errors.add(:data_type, "does not match the data type of the object (#{self.value.class.name})")
   end
 
   def set_data_type
-    @data_type = @value.class.name
+    self.data_type = self.value.class.name
   end
 end
