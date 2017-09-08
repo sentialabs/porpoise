@@ -161,7 +161,7 @@ module Porpoise
         if raise_on_not_found
           raise Porpoise::KeyNotFound.new("Key #{key} could not be found") if o.nil?
           raise Porpoise::TypeMismatch.new("Key #{key} is not an array") unless o.value.is_a?(::Array)
-        else
+        elsif o.nil?
           o = Porpoise::KeyValueObject.new(key: key, value: ::Array.new)
         end
 

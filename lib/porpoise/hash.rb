@@ -105,7 +105,7 @@ module Porpoise
         if raise_on_not_found
           raise Porpoise::KeyNotFound.new("Key #{key} could not be found") if o.nil?
           raise Porpoise::TypeMismatch.new("Key #{key} is not a hash") unless o.value.is_a?(::Hash)
-        else
+        elsif o.nil?
           o = Porpoise::KeyValueObject.new(key: key, value: ::Hash.new)
         end
 
