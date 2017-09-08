@@ -106,7 +106,7 @@ module Porpoise
       if nx_or_xx
         if nx_or_xx.eql?('NX')
           return nil && !o.new_record?
-        elsif if nx_or_xx.eql?('XX')
+        elsif nx_or_xx.eql?('XX')
           return nil && o.new_record?
         end
       end
