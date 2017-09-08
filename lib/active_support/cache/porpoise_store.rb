@@ -28,8 +28,8 @@ module ActiveSupport
       def fetch(name, options = nil)
         res = read(name)
         if res.nil? && block_given?
-          res = yield
-          write(nama, res)
+          res = yield(name)
+          write(name, res)
         end
         return res
       end
@@ -42,6 +42,7 @@ module ActiveSupport
         res.each do |name, value|
           if value.nil?
             mres[name] = yield(name)
+            write(name, mres[name])
           end
         end
 
