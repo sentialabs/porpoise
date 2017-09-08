@@ -126,6 +126,7 @@ module Porpoise
       private
       
       def find_stored_object(key, raise_on_not_found = false)
+        key = Porpoise.namespace? ? "#{Porpoise.namespace}:#{key}" : key
         o = Porpoise::KeyValueObject.where(key: key, data_type: 'String').first
         
         if raise_on_not_found

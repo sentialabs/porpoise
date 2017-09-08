@@ -17,4 +17,18 @@ require "porpoise/hash"
 require "porpoise/set"
 
 module Porpoise
+  class << self
+    def with_namespace(namespace)
+      Thread.current[:namespace] = namespace
+      yield
+    end
+
+    def namespace
+      Thread.current[:namespace]
+    end
+
+    def namespace?
+      self.namespace && !self.namespace.blank?
+    end
+  end
 end
