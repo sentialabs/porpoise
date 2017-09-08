@@ -23,13 +23,13 @@ class Porpoise::KeyValueObject < ActiveRecord::Base
   validates_inclusion_of :data_type, in: %w(String Hash Array)
   validate :validate_data_type, on: :update
 
-  def initialize
+  private
+
+  def after_initialize
     if !data_type.nil? && @value.class.name != @data_type
       raise Porpoise::TypeMismatch.new("#{@value.class.name} is not of type #{@data_type}")
     end
   end
-
-  private
 
   def validate_data_type
     self.errors.add(:data_type, "does not match the data type of the object (#{@value.class.name})")
