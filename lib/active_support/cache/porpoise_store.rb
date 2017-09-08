@@ -67,7 +67,7 @@ module ActiveSupport
       end
 
       def write(name, value, options = nil)
-        Porpose::String.set(name, value.to_json)
+        Porpoise::String.set(name, value.to_json)
       end
     end
   end
