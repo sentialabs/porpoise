@@ -1,6 +1,8 @@
 module Porpoise
   module String
     class << self
+      require "porpoise/key_value_object"
+
       def append(key, value)
         o = find_stored_object(key)
         o.value += value

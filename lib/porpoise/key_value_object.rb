@@ -24,7 +24,7 @@ class Porpoise::KeyValueObject < ActiveRecord::Base
   validate :validate_data_type, on: :update
 
   def initialize
-    if @value.class.name != @data_type
+    if !new_record? && @value.class.name != @data_type
       raise Porpoise::TypeMismatch.new("#{@value.class.name} is not of type #{@data_type}")
     end
   end
