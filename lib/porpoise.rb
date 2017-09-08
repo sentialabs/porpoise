@@ -9,6 +9,7 @@ require "active_support/cache/porpoise_store"
 
 # Utilities
 require "porpoise/util"
+require "porpoise/key"
 
 # Datatypes
 require "porpoise/string"
