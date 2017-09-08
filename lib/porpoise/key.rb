@@ -11,14 +11,14 @@ module Porpoise
         end 
         
         if other_keys.any?
-          aff += Porpoise::KeyValueObject.where(key: other_keys).delete_all
+          aff += Porpoise::KeyValueObject.where(key: other_keys.map { |k| Porpoise::key_with_namespace(k) }).delete_all
         end
 
         return aff
       end
 
       def del_matched(matcher)
-        matcher = matcher.gsub("*", "%")
+        matcher = Porpoise::key_with_namespace(matcher.gsub("*", "%"))
         Porpoise::KeyValueObject.where(["`key` LIKE ?", matcher]).delete_all
       end
 
@@ -31,7 +31,7 @@ module Porpoise
 
       def exists(key, *other_keys)
         all_keys = [key].concat(other_keys)
-        Porpoise::KeyValueObject.where(key: all_keys).count
+        Porpoise::KeyValueObject.where(key: all_keys.map { |k| Porpoise::key_with_namespace(k) }).count
       end
 
       def expire(key, seconds)
@@ -66,15 +66,16 @@ module Porpoise
 
       def keys(key_name_or_search_string)
         if key_name_or_search_string.include?('*')
-          return Porpoise::KeyValueObject.where(['`key` LIKE ?', key_name_or_search_string.gsub('*', '%')]).pluck(:key)
+          return Porpoise::KeyValueObject.where(['`key` LIKE ?', Porpoise::key_with_namespace(key_name_or_search_string.gsub('*', '%'))]).pluck(:key)
         else
-          return Porpoise::KeyValueObject.where(key: key_name_or_search_string).pluck(:key)
+          return Porpoise::KeyValueObject.where(key: Porpoise::key_with_namespace(key_name_or_search_string)).pluck(:key)
         end
       end
 
       private
       
       def find_stored_object(key, raise_on_not_found = false)
+        key = Porpoise::key_with_namespace(key)
         o = Porpoise::KeyValueObject.where(key: key).first
         
         if raise_on_not_found

@@ -35,5 +35,9 @@ module Porpoise
     def namespace?
       self.namespace && !self.namespace.blank?
     end
+
+    def key_with_namespace(key)
+      self.namespace? ? "#{self.namespace}:#{key}" : key
+    end
   end
 end

@@ -68,7 +68,7 @@ module Porpoise
         o = find_stored_object(key)
         values = o.new_record? ? [nil] : o.value
 
-        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.where(key: other_key.map { |k| Porpoise::key_with_namespace(k) }s).all.index_by(&:key)
         other_keys.each do |ok|
           values << oo.has_key?(ok) ? oo[k].value : nil
         end
@@ -126,7 +126,7 @@ module Porpoise
       private
       
       def find_stored_object(key, raise_on_not_found = false)
-        key = Porpoise.namespace? ? "#{Porpoise.namespace}:#{key}" : key
+        key = Porpoise::key_with_namespace(key)
         o = Porpoise::KeyValueObject.where(key: key, data_type: 'String').first
         
         if raise_on_not_found
