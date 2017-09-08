@@ -19,7 +19,7 @@ require "porpoise/set"
 module Porpoise
   class << self
     def with_namespace(namespace)
-      Thread.current[:namespace] = namespace
+      Thread.current[:namespace] = namespace.to_s
       
       res = yield
       
