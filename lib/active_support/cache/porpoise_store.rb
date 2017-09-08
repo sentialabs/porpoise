@@ -54,14 +54,14 @@ module ActiveSupport
 
       def read(name, options = nil)
         val = Porpoise::String.get(name)
-        return val.nil? ? nil : JSON.parse(val)
+        return val.nil? ? nil : JSON.decode(val)
       end
 
       def read_multi(*names)
         result = {}
         names.each do |name|
           val = Porpoise::String.get(name)
-          result[name] = val.nil? ? nil : JSON.parse(val)
+          result[name] = val.nil? ? nil : JSON.decode(val)
         end
         return result
       end
