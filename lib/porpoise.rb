@@ -20,7 +20,12 @@ module Porpoise
   class << self
     def with_namespace(namespace)
       Thread.current[:namespace] = namespace
-      yield
+      
+      res = yield
+      
+      Thread.current[:namespace] = nil
+      
+      return res
     end
 
     def namespace
