@@ -1,5 +1,5 @@
 module Porpoise
-  module Util
+  class Util << self
     def ping
       return !KeyValueObject.last.blank?
     end

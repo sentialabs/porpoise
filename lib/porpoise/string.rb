@@ -1,5 +1,5 @@
 module Porpoise
-  module String
+  class String << self
     def append(key, value)
       o = find_stored_object(key)
       o.value += value

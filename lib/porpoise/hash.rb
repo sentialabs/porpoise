@@ -1,5 +1,5 @@
 module Porpoise
-  module Hash
+  class Hash << self
     def hdel(key, *fields)
       o = find_stored_object(key)
       current_keys = o.value.keys.size

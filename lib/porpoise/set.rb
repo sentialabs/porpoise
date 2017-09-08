@@ -1,5 +1,5 @@
 module Porpoise
-  module Set
+  class Set << self
     def sadd(key, *members)
       o = find_stored_object(key)
       previous_set = o.value.dup
