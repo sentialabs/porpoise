@@ -1,8 +1,6 @@
 module Porpoise
   module String
     class << self
-      require "porpoise/key_value_object"
-
       def append(key, value)
         o = find_stored_object(key)
         o.value += value
@@ -70,7 +68,7 @@ module Porpoise
         o = find_stored_object(key)
         values = o.new_record? ? [nil] : o.value
 
-        oo = ::Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           values << oo.has_key?(ok) ? oo[k].value : nil
         end
@@ -79,12 +77,12 @@ module Porpoise
       end
 
       def mset(key, value, *other_keys_and_values)
-        ::Porpoise::KeyValueObject.transaction do
+        Porpoise::KeyValueObject.transaction do
           o = find_stored_object(key)
           o.value = value
           o.save
 
-          new_keys_and_values = Hash[*other_keys_and_values]
+          new_keys_and_values = ::Hash[*other_keys_and_values]
           new_keys_and_values.each do |nk, nv|
             oo = find_stored_object(nk)
             oo.value = nk
@@ -128,13 +126,13 @@ module Porpoise
       private
       
       def find_stored_object(key, raise_on_not_found = false)
-        o = ::Porpoise::KeyValueObject.where(key: key).first
+        o = Porpoise::KeyValueObject.where(key: key).first
         
         if raise_on_not_found
           raise Porpoise::KeyNotFound.new("Key #{key} could not be found") if o.nil?
-          raise Porpoise::TypeMismatch.new("Key #{key} is not a hash") unless o.value.is_a?(String)
+          raise Porpoise::TypeMismatch.new("Key #{key} is not a string") unless o.value.is_a?(::String)
         else
-          o = ::Porpoise::KeyValueObject.new(key: key, value: String.new)
+          o = Porpoise::KeyValueObject.new(key: key, value: ::String.new)
         end
 
         return o

@@ -19,7 +19,7 @@ module Porpoise
         o = find_stored_object(key)
         current_set = o.value
 
-        oo = ::Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           next unless oo.has_key?(ok)
           current_set = current_set - oo[ok].value
@@ -31,7 +31,7 @@ module Porpoise
         o = find_stored_object(key)
         
         current_set = o.value
-        oo = ::Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           next unless oo.has_key?(ok)
           current_set = current_set - oo[ok].value
@@ -47,7 +47,7 @@ module Porpoise
         o = find_stored_object(key)
         current_set = o.value
 
-        oo = ::Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           next unless oo.has_key?(ok)
           current_set = current_set & oo[ok].value
@@ -59,7 +59,7 @@ module Porpoise
         o = find_stored_object(key)
         
         current_set = o.value
-        oo = ::Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           next unless oo.has_key?(ok)
           current_set = current_set & oo[ok].value
@@ -82,7 +82,7 @@ module Porpoise
       end
 
       def smove(source, destination, member)
-        ::Porpoise::KeyValueObject.transaction do
+        Porpoise::KeyValueObject.transaction do
           src = find_stored_object(source)
           dst = find_stored_object(destination)
           
@@ -129,7 +129,7 @@ module Porpoise
         o = find_stored_object(key)
         current_set = o.value.dup
 
-        oo = ::Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           next unless oo.has_key?(ok)
           current_set.concat(oo[ok].value)
@@ -141,7 +141,7 @@ module Porpoise
         o = find_stored_object(key)
         
         current_set = o.value
-        oo = ::Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           next unless oo.has_key?(ok)
           current_set = current_set.concat(oo[ok].value)
@@ -156,13 +156,13 @@ module Porpoise
       private
       
       def find_stored_object(key, raise_on_not_found = false)
-        o = ::Porpoise::KeyValueObject.where(key: key).first
+        o = Porpoise::KeyValueObject.where(key: key).first
         
         if raise_on_not_found
           raise Porpoise::KeyNotFound.new("Key #{key} could not be found") if o.nil?
-          raise Porpoise::TypeMismatch.new("Key #{key} is not a hash") unless o.value.is_a?(Array)
+          raise Porpoise::TypeMismatch.new("Key #{key} is not an array") unless o.value.is_a?(::Array)
         else
-          o = ::Porpoise::KeyValueObject.new(key: key, value: Array.new)
+          o = Porpoise::KeyValueObject.new(key: key, value: ::Array.new)
         end
 
         return o

@@ -56,7 +56,7 @@ module Porpoise
 
       def hmset(key, *fields_and_values)
         o = find_stored_object(key)
-        set_values = Hash[*fields_and_values]
+        set_values = ::Hash[*fields_and_values]
         o.value.keys.each do |k|
           o.value[k] = set_values[k] if set_values.has_key?(k)
         end
@@ -100,13 +100,13 @@ module Porpoise
       private
 
       def find_stored_object(key, raise_on_not_found = false)
-        o = ::Porpoise::KeyValueObject.where(key: key).first
+        o = Porpoise::KeyValueObject.where(key: key).first
         
         if raise_on_not_found
           raise Porpoise::KeyNotFound.new("Key #{key} could not be found") if o.nil?
-          raise Porpoise::TypeMismatch.new("Key #{key} is not a hash") unless o.value.is_a?(Hash)
+          raise Porpoise::TypeMismatch.new("Key #{key} is not a hash") unless o.value.is_a?(::Hash)
         else
-          o = ::Porpoise::KeyValueObject.new(key: key, value: Hash.new)
+          o = Porpoise::KeyValueObject.new(key: key, value: ::Hash.new)
         end
 
         return o
