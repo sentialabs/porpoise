@@ -13,5 +13,8 @@ require "porpoise/hash"
 require "porpoise/set"
 
 module Porpoise
-  extend Porpoise::String
+  class << self
+    include Porpoise::String
+    extend Porpoise::String
+  end
 end
