@@ -66,9 +66,11 @@ module Porpoise
 
       def keys(key_name_or_search_string)
         if key_name_or_search_string.include?('*')
-          return Porpoise::KeyValueObject.where(['`key` LIKE ?', Porpoise::key_with_namespace(key_name_or_search_string.gsub('*', '%'))]).pluck(:key)
+          ks = Porpoise::KeyValueObject.where(['`key` LIKE ?', Porpoise::key_with_namespace(key_name_or_search_string.gsub('*', '%'))]).pluck(:key)
+          return Porpoise::namespace? ? ks.map { |k| k.sub("#{Porpoise::namespace}:", '') } : ks
         else
-          return Porpoise::KeyValueObject.where(key: Porpoise::key_with_namespace(key_name_or_search_string)).pluck(:key)
+          ks = Porpoise::KeyValueObject.where(key: Porpoise::key_with_namespace(key_name_or_search_string)).pluck(:key)
+          return Porpoise::namespace? ? ks.map { |k| k.sub("#{Porpoise::namespace}:", '') } : ks
         end
       end
 
