@@ -1,4 +1,4 @@
-class KeyValueObject < ActiveRecord::Base
+class Porpoise::KeyValueObject < ActiveRecord::Base
   class Porpoise::TypeMismatch < StandardError
     def initialize(msg)
       super(msg)
