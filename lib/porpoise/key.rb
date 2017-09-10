@@ -11,7 +11,9 @@ module Porpoise
         end 
         
         if other_keys.any?
-          aff += Porpoise::KeyValueObject.where(key: other_keys.map { |k| Porpoise::key_with_namespace(k) }).delete_all
+          aff += Porpoise::KeyValueObject.
+            where(key: other_keys.map { |k| Porpoise::key_with_namespace(k) }).
+            delete_all
         end
 
         return aff
@@ -31,7 +33,9 @@ module Porpoise
 
       def exists(key, *other_keys)
         all_keys = [key].concat(other_keys)
-        Porpoise::KeyValueObject.where(key: all_keys.map { |k| Porpoise::key_with_namespace(k) }).count
+        Porpoise::KeyValueObject.
+          where(key: all_keys.map { |k| Porpoise::key_with_namespace(k) }).
+          count
       end
 
       def expire(key, seconds)
@@ -51,11 +55,15 @@ module Porpoise
       end
 
       def rename(key, newkey)
-        o = find_stored_object(key)
-        return false if o.nil?
-        o.key = key
+        o = find_stored_object(key, true)
+        no = find_stored_object(newkey)
+        
+        no.delete unless no.nil?
+        no = o.dup
+        no.key = newkey
+        o.delete
 
-        o.save
+        no.save
       end
 
       def type(key)
@@ -64,12 +72,24 @@ module Porpoise
         return o.data_type
       end
 
-      def keys(key_name_or_search_string)
-        if key_name_or_search_string.include?('*')
-          ks = Porpoise::KeyValueObject.where(['`key` LIKE ?', Porpoise::key_with_namespace(key_name_or_search_string.gsub('*', '%'))]).pluck(:key)
-          return Porpoise::namespace? ? ks.map { |k| k.sub("#{Porpoise::namespace}:", '') } : ks
+      def ttl(key)
+        o = find_stored_object(key)
+        return -2 if o.nil?
+        return -1 if o.expiration_date.nil?
+        return o.expiration_date - Time.now
+      end
+
+      def keys(key_or_search_string)
+        if key_or_search_string.include?('*')
+          param = Porpoise::key_with_namespace(key_or_search_string.gsub('*', '%'))
+          ks = Porpoise::KeyValueObject.
+            where(['`key` LIKE ?', param]).
+            pluck(:key)
+          
+            return Porpoise::namespace? ? ks.map { |k| k.sub("#{Porpoise::namespace}:", '') } : ks
         else
-          ks = Porpoise::KeyValueObject.where(key: Porpoise::key_with_namespace(key_name_or_search_string)).pluck(:key)
+          param = Porpoise::key_with_namespace(key_or_search_string)
+          ks = Porpoise::KeyValueObject.where(key: param).pluck(:key)
           return Porpoise::namespace? ? ks.map { |k| k.sub("#{Porpoise::namespace}:", '') } : ks
         end
       end
@@ -79,9 +99,9 @@ module Porpoise
       def find_stored_object(key, raise_on_not_found = false)
         key = Porpoise::key_with_namespace(key)
         o = Porpoise::KeyValueObject.where(key: key).first
-        
-        if raise_on_not_found
-          raise Porpoise::KeyNotFound.new("Key #{key} could not be found") if o.nil?
+
+        if raise_on_not_found && o.nil?
+          raise Porpoise::KeyNotFound.new("Key #{key} could not be found")
         end
 
         return o

@@ -27,14 +27,14 @@ module Porpoise
 
       def hincrby(key, field, increment)
         o = find_stored_object(key)
-        o.value[field].to_i += increment.to_i
+        o.value[field] += increment.to_i
         o.save
         o.value[field]
       end
 
       def hincrbyfloat(key, field, increment)
         o = find_stored_object(key)
-        o.value[field].to_f += increment.to_f
+        o.value[field] = (o.value[field] + increment.to_f).round(5)
         o.save
         o.value[field]
       end
@@ -51,14 +51,15 @@ module Porpoise
 
       def hmget(key, *fields)
         o = find_stored_object(key)
-        o.map { |k, v| v if fields.include?(k) }
+        fields.map { |f| o.value.fetch(f, nil) }
       end
 
       def hmset(key, *fields_and_values)
         o = find_stored_object(key)
         set_values = ::Hash[*fields_and_values]
-        o.value.keys.each do |k|
-          o.value[k] = set_values[k] if set_values.has_key?(k)
+
+        set_values.keys.each do |k|
+          o.value[k] = set_values[k]
         end
         o.save
       end
@@ -99,12 +100,21 @@ module Porpoise
 
       private
 
-      def find_stored_object(key, raise_on_not_found = false)
-        key = Porpoise::key_with_namespace(key)
-        o = Porpoise::KeyValueObject.where(key: key, data_type: 'Hash').first
+      def find_stored_object(key,
+          raise_on_type_mismatch = true,
+          raise_on_not_found = false)
         
-        if raise_on_not_found
-          raise Porpoise::KeyNotFound.new("Key #{key} could not be found") if o.nil?
+          key = Porpoise::key_with_namespace(key)
+        o = Porpoise::KeyValueObject.where(key: key).first
+        
+        if raise_on_type_mismatch && !o.nil? && o.data_type != 'Hash'
+          raise Porpoise::TypeMismatch.new(
+            "Key #{key} is not of type Hash (is #{o.data_type})"
+          )
+        end
+
+        if raise_on_not_found && o.nil?
+          raise Porpoise::KeyNotFound.new("Key #{key} could not be found")
         elsif o.nil?
           o = Porpoise::KeyValueObject.new(key: key, value: ::Hash.new)
         end

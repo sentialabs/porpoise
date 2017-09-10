@@ -18,7 +18,11 @@ module ActiveSupport
       end
 
       def decrement(name, amount, options = nil)
-        Porpoise.with_namespace(@namespace) { Porpoise::String.decrby(name, amount) }
+        Porpoise.with_namespace(@namespace) { 
+          v = read(name)
+          v = v.to_i - amount.to_i
+          write(name, v, options)
+        }
       end
 
       def delete(name, options = nil)
@@ -30,20 +34,20 @@ module ActiveSupport
       end
 
       def exists?(name, options = nil)
-        Porpoise.with_namespace(@namespace) { Porpoise::Key.exists(name) }
+        Porpoise.with_namespace(@namespace) { Porpoise::Key.exists(name) == 1 }
       end
 
       def fetch(name, options = nil)
         res = read(name)
         if res.nil? && block_given?
           res = yield(name)
-          write(name, res)
+          write(name, res, options)
         end
         return res
       end
 
       def fetch_multi(*names)
-        res = read_multi(names)
+        res = read_multi(*names)
         return res unless block_given?
 
         mres = {}
@@ -51,6 +55,8 @@ module ActiveSupport
           if value.nil?
             mres[name] = yield(name)
             write(name, mres[name])
+          else
+            mres[name] = value
           end
         end
 
@@ -58,7 +64,11 @@ module ActiveSupport
       end
 
       def increment(name, amount, options = nil)
-        Porpoise.with_namespace(@namespace) { Porpoise::String.incrby(name, amount) }
+        Porpoise.with_namespace(@namespace) {
+          v = read(name)
+          v = v.to_i + amount.to_i
+          write(name, v, options)
+        }
       end
 
       def read(name, options = nil)
@@ -70,13 +80,14 @@ module ActiveSupport
         result = {}
         names.each do |name|
           val = Porpoise.with_namespace(@namespace) { Porpoise::String.get(name) }
-          result[name] = val.nil? ? nil : Marshal.load(val)
+          result[name] = (val.nil? ? nil : Marshal.load(val))
         end
         return result
       end
 
       def write(name, value, options = nil)
-        Porpoise.with_namespace(@namespace) { Porpoise::String.set(name, Marshal.dump(value)) }
+        options = {} if options.nil?
+        Porpoise.with_namespace(@namespace) { Porpoise::String.set(name, Marshal.dump(value), options.fetch(:expires_in, nil)) }
       end
     end
   end

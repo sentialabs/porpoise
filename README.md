@@ -78,9 +78,22 @@ Namespacing is easy as well. Surround your Porpoise calls in a block like this e
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+Clone this repo. Development is done from within a Docker container for which the Dockerfile is included in this repo. Build and start the the container to access this gems development environment:
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+    docker build -t porpoise-app .
+    docker run -it --rm -v "$PWD:/porpoise" porpoise-app
+
+Run all other actions from within the container. Tests:
+
+    bundle exec rspec spec
+
+Console:
+
+    ./bin/console
+
+
+
+PR's are welcome :)
 
 ## Contributing
 

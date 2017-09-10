@@ -1,5 +1,11 @@
 #!/usr/bin/env ruby
 
+require 'active_record'
+
+ENV['rack_env'] = 'test'
+ActiveRecord::Base.establish_connection adapter: "sqlite3", database: ":memory:"
+load File.join('spec/support/schema.rb')
+
 require "bundler/setup"
 require "porpoise"
 
