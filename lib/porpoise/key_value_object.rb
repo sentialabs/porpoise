@@ -29,6 +29,12 @@ class Porpoise::KeyValueObject < ActiveRecord::Base
 
   validates_inclusion_of :data_type, in: %w(String Hash Array)
 
+  scope :not_expired, conditions: ['(expiration_date IS NOT NULL AND expiration_date > ?) OR expiration_date IS NULL', Time.now]
+
+  def expired?
+    !self.expiration_date.nil? && self.expiration_date < Time.now
+  end
+  
   private
 
   def check_data_type

@@ -72,7 +72,6 @@ describe Porpoise::Key do
     Porpoise::String.set('key-test-findera-0', 'foo', 3600)
     Porpoise::String.set('key-test-findera-1', 'foo', 3600)
     Porpoise::String.set('key-test-findera-2', 'foo', 3600)
-
     Porpoise::String.set('key-test-finderb-0', 'foo', 3600)
     Porpoise::String.set('key-test-finderb-1', 'foo', 3600)
     Porpoise::String.set('key-test-finderb-2', 'foo', 3600)

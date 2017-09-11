@@ -9,7 +9,7 @@ ActiveRecord::Schema.define do
   end
 
   add_index :key_value_objects, :key, unique: true, name: 'indexA'
-  add_index :key_value_objects, [:key, :data_type], name: 'indexB'
+  add_index :key_value_objects, [:key, :expiration_date], name: 'indexB'
   add_index :key_value_objects, :key, name: 'key_fulltext_idx', type: :fulltext
   add_index :key_value_objects, :data_type, name: 'indexD'
   add_index :key_value_objects, :expiration_date, name: 'indexE'

@@ -86,10 +86,17 @@ describe ActiveSupport::Cache::PorpoiseStore do
 
   it "can cleanup expired items" do
     cache = ActiveSupport::Cache::PorpoiseStore.new({ namespace: 'porpoise-test8' })
-    cache.write('foo', 'bar', { expires_in: 0 } )
+    cache.write('foo', 'bar', { expires_in: 1 } )
     expect(cache.read('foo')).to eql('bar')
     sleep 1
     cache.cleanup
     expect(cache.read('foo')).to eql(nil)
+  end
+
+  it "can fetch an item from cache with a block and set an expiration date" do
+    cache = ActiveSupport::Cache::PorpoiseStore.new({ namespace: 'porpoise-test9' })
+    expect(cache.fetch('faz', expires_in: 1.hour) { 'baz' }).to eql('baz')
+    sleep 0.1
+    expect(Porpoise::Key.ttl('faz')).to be < 3600
   end
 end

@@ -11,7 +11,7 @@ module Porpoise
         end 
         
         if other_keys.any?
-          aff += Porpoise::KeyValueObject.
+          aff += Porpoise::KeyValueObject.not_expired.
             where(key: other_keys.map { |k| Porpoise::key_with_namespace(k) }).
             delete_all
         end
@@ -21,7 +21,7 @@ module Porpoise
 
       def del_matched(matcher)
         matcher = Porpoise::key_with_namespace(matcher.gsub("*", "%"))
-        Porpoise::KeyValueObject.where(["`key` LIKE ?", matcher]).delete_all
+        Porpoise::KeyValueObject.not_expired.where(["`key` LIKE ?", matcher]).delete_all
       end
 
       def dump(key)
@@ -33,7 +33,7 @@ module Porpoise
 
       def exists(key, *other_keys)
         all_keys = [key].concat(other_keys)
-        Porpoise::KeyValueObject.
+        Porpoise::KeyValueObject.not_expired.
           where(key: all_keys.map { |k| Porpoise::key_with_namespace(k) }).
           count
       end
@@ -82,14 +82,14 @@ module Porpoise
       def keys(key_or_search_string)
         if key_or_search_string.include?('*')
           param = Porpoise::key_with_namespace(key_or_search_string.gsub('*', '%'))
-          ks = Porpoise::KeyValueObject.
+          ks = Porpoise::KeyValueObject.not_expired.
             where(['`key` LIKE ?', param]).
             pluck(:key)
           
             return Porpoise::namespace? ? ks.map { |k| k.sub("#{Porpoise::namespace}:", '') } : ks
         else
           param = Porpoise::key_with_namespace(key_or_search_string)
-          ks = Porpoise::KeyValueObject.where(key: param).pluck(:key)
+          ks = Porpoise::KeyValueObject.not_expired.where(key: param).pluck(:key)
           return Porpoise::namespace? ? ks.map { |k| k.sub("#{Porpoise::namespace}:", '') } : ks
         end
       end
@@ -102,6 +102,10 @@ module Porpoise
 
         if raise_on_not_found && o.nil?
           raise Porpoise::KeyNotFound.new("Key #{key} could not be found")
+        elsif !o.nil? && o.expired?
+          o.delete
+          o = nil
+          raise Porpoise::KeyNotFound.new("Key #{key} could not be found") if raise_on_not_found
         end
 
         return o

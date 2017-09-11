@@ -69,7 +69,7 @@ module Porpoise
         values = o.new_record? ? [nil] : [o.value]
         other_keys = other_keys.map { |k| Porpoise::key_with_namespace(k) }
 
-        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.not_expired.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           values << (oo.has_key?(ok) ? oo[ok].value : nil)
         end
@@ -142,6 +142,9 @@ module Porpoise
         if raise_on_not_found && o.nil?
           raise Porpoise::KeyNotFound.new("Key #{key} could not be found")
         elsif o.nil?
+          o = Porpoise::KeyValueObject.new(key: key, value: ::String.new)
+        elsif o.expired?
+          o.delete
           o = Porpoise::KeyValueObject.new(key: key, value: ::String.new)
         end
 

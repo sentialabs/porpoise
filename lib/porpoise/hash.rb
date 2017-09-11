@@ -104,8 +104,8 @@ module Porpoise
           raise_on_type_mismatch = true,
           raise_on_not_found = false)
         
-          key = Porpoise::key_with_namespace(key)
-        o = Porpoise::KeyValueObject.where(key: key).first
+        key = Porpoise::key_with_namespace(key)
+        o = Porpoise::KeyValueObject.not_expired.where(key: key).first
         
         if raise_on_type_mismatch && !o.nil? && o.data_type != 'Hash'
           raise Porpoise::TypeMismatch.new(
@@ -116,6 +116,9 @@ module Porpoise
         if raise_on_not_found && o.nil?
           raise Porpoise::KeyNotFound.new("Key #{key} could not be found")
         elsif o.nil?
+          o = Porpoise::KeyValueObject.new(key: key, value: ::Hash.new)
+        elsif o.expired?
+          o.delete
           o = Porpoise::KeyValueObject.new(key: key, value: ::Hash.new)
         end
 

@@ -20,7 +20,7 @@ module Porpoise
         current_set = o.value
         other_keys = other_keys.map { |k| Porpoise::key_with_namespace(k) }
 
-        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.not_expired.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           next unless oo.has_key?(ok)
           current_set = current_set - oo[ok].value
@@ -33,7 +33,7 @@ module Porpoise
         current_set = o.value
         other_keys = other_keys.map { |k| Porpoise::key_with_namespace(k) }
 
-        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.not_expired.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           next unless oo.has_key?(ok)
           current_set = current_set - oo[ok].value
@@ -50,7 +50,7 @@ module Porpoise
         current_set = o.value
         other_keys = other_keys.map { |k| Porpoise::key_with_namespace(k) }
 
-        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.not_expired.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           next unless oo.has_key?(ok)
           current_set = current_set & oo[ok].value
@@ -63,7 +63,7 @@ module Porpoise
         current_set = o.value
         other_keys = other_keys.map { |k| Porpoise::key_with_namespace(k) }
 
-        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.not_expired.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           next unless oo.has_key?(ok)
           current_set = current_set & oo[ok].value
@@ -138,7 +138,7 @@ module Porpoise
         current_set = o.value.dup
         other_keys = other_keys.map { |k| Porpoise::key_with_namespace(k) }
 
-        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.not_expired.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           next unless oo.has_key?(ok)
           current_set.concat(oo[ok].value)
@@ -151,7 +151,7 @@ module Porpoise
         current_set = o.value.dup
         other_keys = other_keys.map { |k| Porpoise::key_with_namespace(k) }
 
-        oo = Porpoise::KeyValueObject.where(key: other_keys).all.index_by(&:key)
+        oo = Porpoise::KeyValueObject.not_expired.where(key: other_keys).all.index_by(&:key)
         other_keys.each do |ok|
           next unless oo.has_key?(ok)
           current_set.concat(oo[ok].value)
@@ -170,7 +170,7 @@ module Porpoise
                              raise_on_not_found = false)
 
         key = Porpoise::key_with_namespace(key)
-        o = Porpoise::KeyValueObject.where(key: key).first
+        o = Porpoise::KeyValueObject.not_expired.where(key: key).first
         
         if raise_on_type_mismatch && !o.nil? && o.data_type != 'Array'
           raise Porpoise::TypeMismatch.new(
@@ -181,6 +181,9 @@ module Porpoise
         if raise_on_not_found && o.nil?
           raise Porpoise::KeyNotFound.new("Key #{key} could not be found")
         elsif o.nil?
+          o = Porpoise::KeyValueObject.new(key: key, value: ::Array.new)
+        elsif o.expired?
+          o.delete
           o = Porpoise::KeyValueObject.new(key: key, value: ::Array.new)
         end
 
