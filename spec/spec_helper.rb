@@ -3,6 +3,12 @@ SimpleCov.start
 
 ENV['rack_env'] = 'test'
 
+require 'rspec-benchmark'
+
+RSpec.configure do |config|
+  config.include RSpec::Benchmark::Matchers
+end
+
 require 'active_record'
 require 'sqlite3'
 require 'porpoise'

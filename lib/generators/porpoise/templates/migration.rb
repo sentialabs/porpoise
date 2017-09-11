@@ -1,6 +1,6 @@
 class PorpoiseCreateKeyValueObjects < ActiveRecord::Migration
   def up
-    Porpoise::KeyValueObject.connection.create_table :key_value_objects, id: false do |t|
+    Porpoise::KeyValueObject.connection.create_table :key_value_objects, id: false } do |t|
       t.string :key, null: false
       t.string :data_type, null: false, limit: 10
       t.text :value, limit: 65000000, null: false
