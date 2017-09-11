@@ -63,7 +63,7 @@ Namespacing automatically preprends each cache key with the chosen namespace.
 
 ### As generic key/value storage
  
-Porpoise was designed as an easy replacement for Redis. Therefore it implements various of the types Redis knows (strings, sets and hashes) and their functions. Access them like this:
+Porpoise was designed as an easy replacement for Redis. Therefore it implements various of the commonly used types Redis knows (strings, sets and hashes) and their functions. Access them like this:
 
     Porpoise::String.<redis-function-name-and-arguments>
     Porpoise::Set.<redis-function-name-and-arguments>
