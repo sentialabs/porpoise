@@ -35,6 +35,16 @@ class Porpoise::KeyValueObject < ActiveRecord::Base
     !self.expiration_date.nil? && self.expiration_date < Time.now
   end
   
+  def save
+    super
+  rescue ActiveRecord::RecordNotUnique
+    # catch race conditions
+    o = Porpoise::KeyValueObject.not_expired.where(key: self.key).first
+    o.value = self.value
+    o.expiration_date = self.expiration_date
+    o.save
+  end
+
   private
 
   def check_data_type

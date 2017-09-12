@@ -103,4 +103,12 @@ describe Porpoise::String do
     Porpoise::String.set('string-test21', 'bar', nil, nil, 'XX')
     expect(Porpoise::String.get('string-test21')).to eql('bar')
   end
+
+  it "can overwrite an expired item" do
+    Porpoise::String.set('string-test22', 'foo', 3)
+    expect(Porpoise::String.get('string-test22')).to eql('foo')
+    sleep 4
+    Porpoise::String.set('string-test22', 'bar')
+    expect(Porpoise::String.get('string-test21')).to eql('bar')
+  end
 end

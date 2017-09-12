@@ -138,7 +138,7 @@ module Porpoise
             "Key #{key} is not of type String (is #{o.data_type})"
           )
         end
-
+        
         if raise_on_not_found && o.nil?
           raise Porpoise::KeyNotFound.new("Key #{key} could not be found")
         elsif o.nil?

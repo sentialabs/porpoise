@@ -99,4 +99,11 @@ describe ActiveSupport::Cache::PorpoiseStore do
     sleep 0.1
     expect(Porpoise::Key.ttl('faz')).to be < 3600
   end
+
+  it "can fetch an item and set a new value once expired" do
+    cache = ActiveSupport::Cache::PorpoiseStore.new({ namespace: 'porpoise-test10' })
+    expect(cache.fetch('faz', expires_in: 1 ) { 'baz' }).to eql('baz')
+    sleep 1.1
+    expect(cache.fetch('faz', expires_in: 1 ) { 'raz' }).to eql('raz')
+  end
 end
