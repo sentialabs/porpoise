@@ -9,13 +9,13 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Wessel van Heerde"]
   spec.email         = ["wessel.van.heerde@sentia.com"]
   spec.licenses      = ['MIT']
-  spec.summary       = "MySQL key/value store with a Redis compatible interface. Store and access objects in a Redis like way using MySQL storage. Don't use for high performance, use for easy multi master clustering."
-  spec.homepage      = "https://dev-git.sentia.com/rubygems/porpoise"
+  spec.summary       = "Rails caching with a MySQL backend. Also a MySQL key/value store with a Redis compatible interface. Store and access objects in a Redis like way using MySQL as storage backend."
+  spec.homepage      = "https://github.com/sentialabs/porpoise"
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
     f.match(%r{^(test|spec|features)/})
   end
-  spec.bindir        = "exe"
+  spec.bindir        = "bin"
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
