@@ -109,7 +109,8 @@ describe ActiveSupport::Cache::PorpoiseStore do
 
   it "should remove old items from the short term cache when exceeding the cache limit" do
     cache = ActiveSupport::Cache::PorpoiseStore.new({ namespace: 'porpoise-test10' })
-    200.times.each_with_index do |idx|
+    t = ActiveSupport::Cache::PorpoiseStore::SHORT_LIFE_CACHE_SIZE + 10
+    t.times.each_with_index do |idx|
       cache.write("foo-#{idx}", "bar")
     end
     expect(cache.slc.keys.size).to eql(ActiveSupport::Cache::PorpoiseStore::SHORT_LIFE_CACHE_SIZE)

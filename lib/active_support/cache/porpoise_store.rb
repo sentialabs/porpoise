@@ -3,7 +3,7 @@ module ActiveSupport
     class PorpoiseStore < Store
       # The maximum number of objects to store in
       # the short life cache.
-      SHORT_LIFE_CACHE_SIZE = 100
+      SHORT_LIFE_CACHE_SIZE = 5000
 
       # The number of seconds items in the short
       # cache are allowed to live.
