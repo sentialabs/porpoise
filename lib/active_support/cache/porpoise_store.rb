@@ -1,19 +1,32 @@
 module ActiveSupport
   module Cache
     class PorpoiseStore < Store
+      # The maximum number of objects to store in
+      # the short life cache.
+      SHORT_LIFE_CACHE_SIZE = 100
+
+      # The number of seconds items in the short
+      # cache are allowed to live.
+      SHORT_LIFE_CACHE_TIME = 5
+
       attr_reader :namespace
+      attr_reader :slc # short life cache
 
       def initialize(options = {})
         @namespace = options.fetch(:namespace, "active-support-cache").to_s
       end
 
       def cleanup(options = nil)
+        short_mem_reset
         Porpoise::KeyValueObject.where(["`key` LIKE ?", "#{@namespace}:%"]).
                                  where(["expiration_date IS NOT NULL AND expiration_date < ?", Time.now]).
                                  delete_all
+
+
       end
 
       def clear(options = nil)
+        short_mem_reset
         Porpoise::KeyValueObject.where(["`key` LIKE ?", "#{@namespace}:%"]).delete_all
       end
 
@@ -26,10 +39,14 @@ module ActiveSupport
       end
 
       def delete(name, options = nil)
-        Porpoise.with_namespace(@namespace) { Porpoise::Key.del(name) }
+        Porpoise.with_namespace(@namespace) { 
+          short_mem_del(name)
+          Porpoise::Key.del(name)
+        }
       end
 
       def delete_matched(matcher, options = nil)
+        short_mem_reset
         Porpoise.with_namespace(@namespace) { Porpoise::Key.del_matched(matcher) }
       end
 
@@ -72,22 +89,91 @@ module ActiveSupport
       end
 
       def read(name, options = nil)
-        val = Porpoise.with_namespace(@namespace) { Porpoise::String.get(name) }
-        return val.nil? ? nil : Marshal.load(val)
+        val = Porpoise.with_namespace(@namespace) {
+          short_mem_read(name) { Porpoise::String.get(name) }
+        }
+
+        begin
+          return val.nil? ? nil : Marshal.load(val)
+        rescue TypeError
+          return val
+        end
       end
 
       def read_multi(*names)
         result = {}
         names.each do |name|
-          val = Porpoise.with_namespace(@namespace) { Porpoise::String.get(name) }
-          result[name] = (val.nil? ? nil : Marshal.load(val))
+          val = Porpoise.with_namespace(@namespace) { 
+            short_mem_read(name) { Porpoise::String.get(name) }
+          }
+          begin
+            result[name] = (val.nil? ? nil : Marshal.load(val))
+          rescue TypeError
+            result[name] = val
+          end
         end
         return result
       end
 
       def write(name, value, options = nil)
         options = {} if options.nil?
-        Porpoise.with_namespace(@namespace) { Porpoise::String.set(name, Marshal.dump(value), options.fetch(:expires_in, nil)) }
+        Porpoise.with_namespace(@namespace) {
+          short_mem_write(name, value, options) {
+            Porpoise::String.set(name, Marshal.dump(value), options.fetch(:expires_in, nil))
+          }
+        }
+      end
+
+      private
+
+      def short_mem_reset
+        @slc = {}
+        @slt = {}
+      end
+
+      def short_mem_write(name, value, options = nil)
+        @slc ||= {}
+        @slt ||= {}
+
+        # Do not write the short life cache if an item has an expiration time
+        # so short that it would expire while in short life cache
+        unless options.fetch(:expires_in, (SHORT_LIFE_CACHE_TIME + 1)).to_i < SHORT_LIFE_CACHE_TIME
+          @slt[name] = Time.now.to_i
+          @slc[name] = value
+        end
+
+        # Remove the oldest entries when cache gets to big
+        if @slt.keys.size >= SHORT_LIFE_CACHE_SIZE
+          kk = @slt.sort_by { |k,v| value }.shift(@slt.keys.size - SHORT_LIFE_CACHE_SIZE).map { |kv| kv[0] }
+          kk.each do |k|
+            @slt.delete(k)
+            @slc.delete(k)
+          end
+        end
+
+        yield if block_given?
+      end
+
+      def short_mem_read(name)
+        @slc ||= {}
+        @slt ||= {}
+        v = @slc.fetch(name, nil)
+        
+        # Remove dead items
+        if v && (@slt[name] + SHORT_LIFE_CACHE_TIME) < Time.now.to_i
+          @slc.delete(name)
+          @slt.delete(name)
+          v = nil
+        end
+
+        v = yield if v.nil? && block_given?
+
+        return v
+      end
+
+      def short_mem_del(name)
+        @slc.delete(name)
+        @slt.delete(name)
       end
     end
   end
