@@ -10,7 +10,7 @@ module ActiveSupport
       SHORT_LIFE_CACHE_TIME = 5
 
       attr_reader :namespace
-      attr_reader :slc # short life cache
+      attr_reader :slc, :slt # short life cache
 
       def initialize(options = {})
         @namespace = options.fetch(:namespace, "active-support-cache").to_s
@@ -136,18 +136,17 @@ module ActiveSupport
         @slt ||= {}
 
         # Do not write the short life cache if an item has an expiration time
-        # so short that it would expire while in short life cache
-        unless options.fetch(:expires_in, (SHORT_LIFE_CACHE_TIME + 1)).to_i < SHORT_LIFE_CACHE_TIME
+        unless options && options.has_key?(:expires_in)
           @slt[name] = Time.now.to_i
           @slc[name] = value
-        end
 
-        # Remove the oldest entries when cache gets to big
-        if @slt.keys.size >= SHORT_LIFE_CACHE_SIZE
-          kk = @slt.sort_by { |k,v| value }.shift(@slt.keys.size - SHORT_LIFE_CACHE_SIZE).map { |kv| kv[0] }
-          kk.each do |k|
-            @slt.delete(k)
-            @slc.delete(k)
+          # Remove the oldest entries when cache gets to big
+          if @slt.keys.size >= SHORT_LIFE_CACHE_SIZE
+            kk = @slt.sort_by { |k,v| value }.shift(@slt.keys.size - SHORT_LIFE_CACHE_SIZE).map { |kv| kv[0] }
+            kk.each do |k|
+              @slt.delete(k)
+              @slc.delete(k)
+            end
           end
         end
 
@@ -166,7 +165,10 @@ module ActiveSupport
           v = nil
         end
 
-        v = yield if v.nil? && block_given?
+        if v.nil? && block_given?
+          v = yield
+          short_mem_write(name, v) unless v.nil?
+        end
 
         return v
       end
