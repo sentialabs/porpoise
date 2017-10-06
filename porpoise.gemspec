@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = Porpoise::VERSION
   spec.authors       = ["Wessel van Heerde"]
   spec.email         = ["wessel.van.heerde@sentia.com"]
-
+  spec.licenses      = ['MIT']
   spec.summary       = "MySQL key/value store with a Redis compatible interface. Store and access objects in a Redis like way using MySQL storage. Don't use for high performance, use for easy multi master clustering."
   spec.homepage      = "https://dev-git.sentia.com/rubygems/porpoise"
 
@@ -31,7 +31,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler", "~> 1.13"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.2" 
-  spec.add_development_dependency "sqlite3", "~> 1.3.5"
+  spec.add_development_dependency "sqlite3", "~> 1.3"
   spec.add_development_dependency "simplecov", "~> 0"
   spec.add_development_dependency "rspec-benchmark", "~> 0"
 
