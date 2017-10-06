@@ -6,15 +6,19 @@ Porpoise implements a Redis like interface using MySQL as its storage engine. Th
 
 ### Performance
 
-Redis outperforms this implementation by a long shot :p I don't think I have to tell why. This thing integrates with Rails, uses ActiveRecord and all the bloat that comes with it. But sometimes... performance is not the issue.
+Redis outperforms this implementation by a long shot and I don't think I have to tell why. For an SQL based solution it still performs alright though. Besides, this thing integrates with Rails, uses ActiveRecord and all the bloat that comes with it. And altough a cache should help performance, cache read/write speed sometimes are not the bottleneck.
 
 ### Then why?
 
 To simplify your stack? To get a real multi-master setup using MySQL/Galera? To get rid of an unstable situation?
 
-This gem was written out of the need to get rid of our shaky Redis Dynomite cluster which we implemented due to the requirement of having actual multi-master clusters. Master-slave- and failover setups tend to break over time, so multi-master is our way to go.
+This gem was written out of the need to get rid of our shaky Redis Dynomite cluster which we implemented due to the requirement of having real multi-master clusters. Master-slave- and failover setups tend to break over time, so multi-master is the only acceptable way to go.
 
 So Redis /w Dynomite kept exploding at every little burp so we needed a solution. MySQL / Galera was already there as our primary datastore so the alternative was easily chosen. Reasons: proven multi-master setup and a more easy stack. With our userbase and use of Redis, performance was of minor importance.
+
+## Compatibility
+
+This gem has been tested with Rails 3, but probably also works with newer versions of Rails.
 
 ## Installation
 
@@ -63,7 +67,7 @@ Namespacing automatically preprends each cache key with the chosen namespace.
 
 ### As generic key/value storage
  
-Porpoise was designed as an easy replacement for Redis. Therefore it implements various of the commonly used types Redis knows (strings, sets and hashes) and their functions. Access them like this:
+Porpoise was designed as an easy replacement for Redis. Therefore it implements various of the commonly used types Redis knows (strings, sets and hashes) and most of their functions. Access them like this:
 
     Porpoise::String.<redis-function-name-and-arguments>
     Porpoise::Set.<redis-function-name-and-arguments>
@@ -78,7 +82,7 @@ Namespacing is easy as well. Surround your Porpoise calls in a block like this e
 
 ## Development
 
-Clone this repo. Development is done from within a Docker container for which the Dockerfile is included in this repo. Build and start the the container to access this gems development environment:
+Fork this repo. Development is done from within a Docker container for which the Dockerfile is included in this repo. Build and start the the container to access this gems development environment:
 
     docker build -t porpoise-app .
     docker run -it --rm -v "$PWD:/porpoise" porpoise-app
@@ -87,15 +91,19 @@ Run all other actions from within the container. Tests:
 
     bundle exec rspec spec
 
+Tests take some time as there's some performance tests included.
+
 Console:
 
     ./bin/console
 
-
-
 PR's are welcome :)
+
+## Todo
+
+Of course there's still some work to do. Performance tests do not represent actual performance, as they currently use a memory store which should be file based to include disk I/O in the tests.
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/porpoise.
+Bug reports and pull requests are welcome on GitHub at https://github.com/sentialabs/porpoise.
 
