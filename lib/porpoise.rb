@@ -2,7 +2,6 @@ require "porpoise/version"
 
 require "active_record"
 require "active_support"
-require "mysql2"
 
 # Porpoise specific
 require "porpoise/key_value_object"

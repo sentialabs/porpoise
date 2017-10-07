@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Wessel van Heerde"]
   spec.email         = ["wessel.van.heerde@sentia.com"]
   spec.licenses      = ['MIT']
-  spec.summary       = "Rails caching with a MySQL backend. Also a MySQL key/value store with a Redis compatible interface. Store and access objects in a Redis like way using MySQL as storage backend."
+  spec.summary       = "Rails caching with an RDBMS backend. Also a key/value store with a Redis compatible interface backed by an RDBMS."
   spec.homepage      = "https://github.com/sentialabs/porpoise"
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
@@ -19,15 +19,16 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
+  spec.required_ruby_version = '>= 2.0'
+
   spec.add_development_dependency "bundler", "~> 1.13"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.2" 
   spec.add_development_dependency "sqlite3", "~> 1.3"
   spec.add_development_dependency "simplecov", "~> 0"
-  spec.add_development_dependency "rspec-benchmark", "~> 0"
+  spec.add_development_dependency "appraisal"
 
-  spec.add_dependency 'mysql2', '~> 0.3.20'
-  spec.add_dependency 'activerecord', "~> 3.2"
-  spec.add_dependency 'activesupport', "~> 3.2"
-  spec.add_dependency "rails", '~> 3.2'
+  spec.add_dependency 'activerecord', ">= 3.2"
+  spec.add_dependency 'activesupport', ">= 3.2"
+  spec.add_dependency "rails", ">= 3.2"
 end

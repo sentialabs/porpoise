@@ -2,23 +2,23 @@
 
 ## Welcome
 
-Porpoise implements a Redis like interface using MySQL as its storage engine. This provides an easy replacement for Rails applications that currently use Redis to store key/value data and would like to switch to MySQL for whatever reason.
+Porpoise implements an additional cache backend for Ruby on Rails applications. It's compatible with Rails' ActiveSupport::Cache interface and is easily configured. It also provides a Redis like interface using your chosen RDBMS as its storage engine. This provides an easy replacement for Rails applications that currently use Redis to store key/value data and would like to switch an RDBMS for whatever reason.
 
 ### Performance
 
-Redis outperforms this implementation by a long shot and I don't think I have to tell why. For an SQL based solution it still performs alright though. Besides, this thing integrates with Rails, uses ActiveRecord and all the bloat that comes with it. And altough a cache should help performance, cache read/write speed sometimes are not the bottleneck.
+Redis outperforms this implementation by a long shot and I don't think I have to tell why. For an SQL based solution it still performs alright though. Besides, this thing integrates with Rails, uses ActiveRecord and all the bloat that comes with it. And altough a cache should help performance, cache read/write speed sometimes are not the problem. To prevent firing the same query when reading the same cache fragment over and over again, this thing comes with a short life in-memory cache to quickly return those items. In our situation, reading data was even faster than the Redis based solution.
 
 ### Then why?
 
-To simplify your stack? To get a real multi-master setup using MySQL/Galera? To get rid of an unstable situation?
+To simplify your stack? To get a real multi-master setup using MySQL/Galera? To get rid of an unstable situation? To have a centralized cache when you have no Memcache or Redis at your disposal?
 
-This gem was written out of the need to get rid of our shaky Redis Dynomite cluster which we implemented due to the requirement of having real multi-master clusters. Master-slave- and failover setups tend to break over time, so multi-master is the only acceptable way to go.
+This gem was written out of the need to get rid of a shaky Redis Dynomite cluster which we implemented due to the requirement of having real multi-master clusters. Master-slave- and failover setups tend to break over time, so multi-master is the only acceptable way to go.
 
-So Redis /w Dynomite kept exploding at every little burp so we needed a solution. MySQL / Galera was already there as our primary datastore so the alternative was easily chosen. Reasons: proven multi-master setup and a more easy stack. With our userbase and use of Redis, performance was of minor importance.
+So Redis /w Dynomite kept exploding at every little burp so we needed a solution. MySQL / Galera was already there as our primary datastore so the alternative was easily chosen. Reasons: proven multi-master setup and a less complex stack. This was a win/win solution. With our userbase and use of Redis, performance was of minor importance.
 
 ## Compatibility
 
-This gem has been tested with Rails 3, but probably also works with newer versions of Rails.
+This gem has been tested with Rails 3, and includes tests for Rails 4 and Rails 5.
 
 ## Installation
 
@@ -43,7 +43,7 @@ After installation of the gem, install the required migration:
 Porpoise runs in a different database for easy optimization and decoupling. Add an entry in your config/database.yml for porpoise.
 
     porpoise_development:
-        adapter: mysql2
+        adapter: <adapter of choice>
         username: <porpoise_db_user>
         ...
 
@@ -89,15 +89,18 @@ Fork this repo. Development is done from within a Docker container for which the
 
 Run all other actions from within the container. Tests:
 
-    bundle exec rspec spec
-
-Tests take some time as there's some performance tests included.
+    appraisal install
+    appraisal rails-3 rspec spec
+    appraisal rails-4 rspec spec
+    appraisal rails-5 rspec spec
 
 Console:
 
-    ./bin/console
+    appraisal rails-3 ./bin/console
+    appraisal rails-4 ./bin/console
+    appraisal rails-5 ./bin/console
 
-PR's are welcome :)
+PR's are welcome :) This is my first gem thingie ever, so help me out.
 
 ## Todo
 

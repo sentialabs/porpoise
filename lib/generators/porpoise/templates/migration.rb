@@ -9,7 +9,6 @@ class PorpoiseCreateKeyValueObjects < ActiveRecord::Migration
 
     Porpoise::KeyValueObject.connection.add_index :key_value_objects, :key, unique: true
     Porpoise::KeyValueObject.connection.add_index :key_value_objects, [:key, :expiration_date]
-    Porpoise::KeyValueObject.connection.add_index :key_value_objects, :key, name: 'key_fulltext_idx', type: :fulltext
     Porpoise::KeyValueObject.connection.add_index :key_value_objects, :data_type
     Porpoise::KeyValueObject.connection.add_index :key_value_objects, :expiration_date
   end

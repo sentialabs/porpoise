@@ -22,14 +22,16 @@ class Porpoise::KeyValueObject < ActiveRecord::Base
 
   serialize :value
 
-  attr_accessible :key, :value, :data_type, :expiration_date
+  if ActiveRecord::VERSION::MAJOR == 3
+    attr_accessible :key, :value, :data_type, :expiration_date
+  end
 
   after_initialize :check_data_type
   before_validation :set_data_type
 
   validates_inclusion_of :data_type, in: %w(String Hash Array)
 
-  scope :not_expired, conditions: ['(expiration_date IS NOT NULL AND expiration_date > ?) OR expiration_date IS NULL', Time.now]
+  scope :not_expired, -> { where(['(expiration_date IS NOT NULL AND expiration_date > ?) OR expiration_date IS NULL', Time.now]) }
 
   def expired?
     !self.expiration_date.nil? && self.expiration_date < Time.now
