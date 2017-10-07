@@ -102,10 +102,6 @@ Console:
 
 PR's are welcome :) This is my first gem thingie ever, so help me out.
 
-## Todo
-
-Of course there's still some work to do. Performance tests do not represent actual performance, as they currently use a memory store which should be file based to include disk I/O in the tests.
-
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/sentialabs/porpoise.
