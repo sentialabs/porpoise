@@ -6,7 +6,7 @@ Porpoise implements an additional cache backend for Ruby on Rails applications. 
 
 ### Performance
 
-Redis outperforms this implementation by a long shot and I don't think I have to tell why. For an SQL based solution it still performs alright though. Besides, this thing integrates with Rails, uses ActiveRecord and all the bloat that comes with it. And altough a cache should help performance, cache read/write speed sometimes are not the problem. To prevent firing the same query when reading the same cache fragment over and over again, this thing comes with a short life in-memory cache to quickly return those items. In our situation, reading data was even faster than the Redis based solution.
+Redis outperforms this implementation and I don't think I have to tell why. For an SQL based solution it still performs alright though. By using a short living in-memory cache it actually comes close to a Redis based solution, at least in our setup. Besides, this thing integrates with Rails, uses ActiveRecord and all the bloat that comes with it. And although a cache should help performance, cache read/write speed sometimes are not the problem. To prevent firing the same query when reading the same cache fragment over and over again, this thing comes with a short life in-memory cache to quickly return those items. In our situation, reading data was even faster than the Redis based solution.
 
 ### Then why?
 

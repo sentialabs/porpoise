@@ -124,4 +124,9 @@ describe ActiveSupport::Cache::PorpoiseStore do
     cache.read("foo")
     expect(cache.slt.values.first).to be >= tm
   end
+
+  it "should not raise when deleting non-existing items" do
+    cache = ActiveSupport::Cache::PorpoiseStore.new({ namespace: 'porpoise-test13' })
+    expect { cache.delete('foo') }.to_not raise_error
+  end
 end

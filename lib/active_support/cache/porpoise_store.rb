@@ -174,6 +174,9 @@ module ActiveSupport
       end
 
       def short_mem_del(name)
+        @slc ||= {}
+        @slt ||= {}
+        
         @slc.delete(name)
         @slt.delete(name)
       end
