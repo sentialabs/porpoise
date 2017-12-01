@@ -18,17 +18,24 @@ module ActiveSupport
 
       def cleanup(options = nil)
         short_mem_reset
-        Porpoise::KeyValueObject.where(["`key` LIKE ?", "#{@namespace}:%"]).
-                                 where(["expiration_date IS NOT NULL AND expiration_date < ?", Time.now]).
-                                 delete_all
-
-
+        
+        Porpoise::KeyValueObject.retry_lock_error(20) do
+          Porpoise::KeyValueObject.where(["`key` LIKE ?", "#{@namespace}:%"]).
+                                   where(["expiration_date IS NOT NULL AND expiration_date < ?", Time.now]).
+                                   pluck(:key).
+                                   in_groups_of(150) do |object_keys|
+          
+            Porpoise::KeyValueObject.where(key: object_keys).delete_all
+          end
+        end
       end
 
       def clear(options = nil)
         short_mem_reset
         Porpoise::KeyValueObject.retry_lock_error(20) do
-          Porpoise::KeyValueObject.where(["`key` LIKE ?", "#{@namespace}:%"]).delete_all
+          Porpoise::KeyValueObject.where(["`key` LIKE ?", "#{@namespace}:%"]).pluck(:key).in_groups_of(150) do |object_keys|
+            Porpoise::KeyValueObject.where(key: object_keys).delete_all
+          end
         end
       end
 

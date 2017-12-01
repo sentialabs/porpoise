@@ -22,7 +22,9 @@ module Porpoise
       def del_matched(matcher)
         matcher = Porpoise::key_with_namespace(matcher.gsub("*", "%"))
         Porpoise::KeyValueObject.retry_lock_error(20) do
-          Porpoise::KeyValueObject.not_expired.where(["`key` LIKE ?", matcher]).delete_all
+          Porpoise::KeyValueObject.not_expired.where(["`key` LIKE ?", matcher]).pluck(:key).in_groups_of(150) do |object_keys|
+            Porpoise::KeyValueObject.where(key: object_keys).delete_all
+          end
         end
       end
 

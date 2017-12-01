@@ -44,10 +44,6 @@ class Porpoise::KeyValueObject < ActiveRecord::Base
       else
         raise e
       end
-    rescue ActiveRecord::TransactionIsolationConflict
-      if retries.nil? || retries > 0
-        retry_lock_error(retries ? retries - 1 : nil, &block)
-      end
     end
   end
 
