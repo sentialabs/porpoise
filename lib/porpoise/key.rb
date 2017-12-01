@@ -6,7 +6,7 @@ module Porpoise
         aff = 0
 
         unless o.nil?
-          o.delete
+          Porpoise::KeyValueObject.retry_lock_error(20) { o.delete }
           aff += 1
         end 
         
@@ -21,7 +21,9 @@ module Porpoise
 
       def del_matched(matcher)
         matcher = Porpoise::key_with_namespace(matcher.gsub("*", "%"))
-        Porpoise::KeyValueObject.not_expired.where(["`key` LIKE ?", matcher]).delete_all
+        Porpoise::KeyValueObject.retry_lock_error(20) do
+          Porpoise::KeyValueObject.not_expired.where(["`key` LIKE ?", matcher]).delete_all
+        end
       end
 
       def dump(key)
@@ -58,10 +60,13 @@ module Porpoise
         o = find_stored_object(key, true)
         no = find_stored_object(newkey)
         
-        no.delete unless no.nil?
+        unless no.nil?
+          Porpoise::KeyValueObject.retry_lock_error(20) { no.delete }
+        end
+
         no = o.dup
         no.key = newkey
-        o.delete
+        Porpoise::KeyValueObject.retry_lock_error(20) {  o.delete }
 
         no.save
       end
@@ -103,7 +108,7 @@ module Porpoise
         if raise_on_not_found && o.nil?
           raise Porpoise::KeyNotFound.new("Key #{key} could not be found")
         elsif !o.nil? && o.expired?
-          o.delete
+          Porpoise::KeyValueObject.retry_lock_error(20) { o.delete }
           o = nil
           raise Porpoise::KeyNotFound.new("Key #{key} could not be found") if raise_on_not_found
         end

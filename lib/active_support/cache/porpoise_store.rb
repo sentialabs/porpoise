@@ -27,7 +27,9 @@ module ActiveSupport
 
       def clear(options = nil)
         short_mem_reset
-        Porpoise::KeyValueObject.where(["`key` LIKE ?", "#{@namespace}:%"]).delete_all
+        Porpoise::KeyValueObject.retry_lock_error(20) do
+          Porpoise::KeyValueObject.where(["`key` LIKE ?", "#{@namespace}:%"]).delete_all
+        end
       end
 
       def decrement(name, amount, options = nil)
@@ -97,6 +99,12 @@ module ActiveSupport
           return val.nil? ? nil : Marshal.load(val)
         rescue TypeError
           return val
+        rescue ArgumentError => e
+          if e.message =~ /marshal data too short/
+            return nil
+          else
+            raise e
+          end
         end
       end
 
@@ -110,6 +118,12 @@ module ActiveSupport
             result[name] = (val.nil? ? nil : Marshal.load(val))
           rescue TypeError
             result[name] = val
+          rescue ArgumentError => e
+            if e.message =~ /marshal data too short/
+              return nil
+            else
+              raise e
+            end
           end
         end
         return result

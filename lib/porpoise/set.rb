@@ -183,7 +183,7 @@ module Porpoise
         elsif o.nil?
           o = Porpoise::KeyValueObject.new(key: key, value: ::Array.new)
         elsif o.expired?
-          o.delete
+          Porpoise::KeyValueObject.retry_lock_error(20) { o.delete }
           o = Porpoise::KeyValueObject.new(key: key, value: ::Array.new)
         end
 

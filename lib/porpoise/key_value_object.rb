@@ -20,6 +20,8 @@ class Porpoise::KeyValueObject < ActiveRecord::Base
   end
   # :nocov:
 
+  DEADLOCK_RETRY_COUNT = 20
+
   serialize :value
 
   if ActiveRecord::VERSION::MAJOR == 3
@@ -32,6 +34,22 @@ class Porpoise::KeyValueObject < ActiveRecord::Base
   validates_inclusion_of :data_type, in: %w(String Hash Array)
 
   scope :not_expired, -> { where(['(expiration_date IS NOT NULL AND expiration_date > ?) OR expiration_date IS NULL', Time.now]) }
+
+  def self.retry_lock_error(retries = 20, &block)
+    begin
+      yield
+    rescue ActiveRecord::StatementInvalid => e
+      if e.message =~ /Deadlock found when trying to get lock/ and (retries.nil? || retries > 0)
+        retry_lock_error(retries ? retries - 1 : nil, &block)
+      else
+        raise e
+      end
+    rescue ActiveRecord::TransactionIsolationConflict
+      if retries.nil? || retries > 0
+        retry_lock_error(retries ? retries - 1 : nil, &block)
+      end
+    end
+  end
 
   def expired?
     !self.expiration_date.nil? && self.expiration_date < Time.now
