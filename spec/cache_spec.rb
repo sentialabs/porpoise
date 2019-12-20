@@ -86,11 +86,34 @@ describe ActiveSupport::Cache::PorpoiseStore do
 
   it "can cleanup expired items" do
     cache = ActiveSupport::Cache::PorpoiseStore.new({ namespace: 'porpoise-test8' })
-    cache.write('foo', 'bar', { expires_in: 1 } )
-    expect(cache.read('foo')).to eql('bar')
+    (1...330).each do |i|
+      cache.write("foo#{i}", "bar#{i}", { expires_in: 1 } )
+    end
+
+    cache.write("foo_not_expiring_1", "bar_not_expiring_1", { expires_in: 1440 } )
+    cache.write("foo_not_expiring_2", "bar_not_expiring_2", { expires_in: 1440 } )
+
+    expect(cache.read('foo1')).to eql('bar1')
+    expect(cache.read('foo100')).to eql('bar100')
+    expect(cache.read('foo200')).to eql('bar200')
+    expect(cache.read('foo300')).to eql('bar300')
+    expect(cache.read('foo329')).to eql('bar329')
+
+    expect(cache.read('foo_not_expiring_1')).to eql('bar_not_expiring_1')
+    expect(cache.read('foo_not_expiring_2')).to eql('bar_not_expiring_2')
+
     sleep 1
-    cache.cleanup
-    expect(cache.read('foo')).to eql(nil)
+    total_deleted_items_count = cache.cleanup
+
+    expect(total_deleted_items_count).to eql(329)
+    expect(cache.read('foo1')).to eql(nil)
+    expect(cache.read('foo100')).to eql(nil)
+    expect(cache.read('foo200')).to eql(nil)
+    expect(cache.read('foo300')).to eql(nil)
+    expect(cache.read('foo329')).to eql(nil)
+
+    expect(cache.read('foo_not_expiring_1')).to eql('bar_not_expiring_1')
+    expect(cache.read('foo_not_expiring_2')).to eql('bar_not_expiring_2')
   end
 
   it "can fetch an item from cache with a block and set an expiration date" do
