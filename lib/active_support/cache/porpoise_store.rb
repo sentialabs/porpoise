@@ -18,16 +18,21 @@ module ActiveSupport
 
       def cleanup(options = nil)
         short_mem_reset
-        
+
+        total_deleted_items_count = 0
+
         Porpoise::KeyValueObject.retry_lock_error(20) do
-          Porpoise::KeyValueObject.where(["`key` LIKE ?", "#{@namespace}:%"]).
-                                   where(["expiration_date IS NOT NULL AND expiration_date < ?", Time.now]).
-                                   pluck(:key).
-                                   in_groups_of(150) do |object_keys|
-          
-            Porpoise::KeyValueObject.where(key: object_keys).delete_all
+          query = 'DELETE FROM key_value_objects WHERE `key` LIKE ? AND expiration_date IS NOT NULL AND expiration_date < ? LIMIT 200'
+          sanitized_query = ActiveRecord::Base.send(:sanitize_sql_array, [query, "#{@namespace}:%", Time.now])
+
+          deleted_items_count = 1
+          while deleted_items_count > 0 do
+            deleted_items_count = ActiveRecord::Base.connection.send(:delete, sanitized_query)
+            total_deleted_items_count += deleted_items_count
           end
         end
+
+        return total_deleted_items_count
       end
 
       def clear(options = nil)
@@ -40,7 +45,7 @@ module ActiveSupport
       end
 
       def decrement(name, amount, options = nil)
-        Porpoise.with_namespace(@namespace) { 
+        Porpoise.with_namespace(@namespace) {
           v = read(name)
           v = v.to_i - amount.to_i
           write(name, v, options)
@@ -48,7 +53,7 @@ module ActiveSupport
       end
 
       def delete(name, options = nil)
-        Porpoise.with_namespace(@namespace) { 
+        Porpoise.with_namespace(@namespace) {
           short_mem_del(name)
           Porpoise::Key.del(name)
         }
@@ -118,7 +123,7 @@ module ActiveSupport
       def read_multi(*names)
         result = {}
         names.each do |name|
-          val = Porpoise.with_namespace(@namespace) { 
+          val = Porpoise.with_namespace(@namespace) {
             short_mem_read(name) { Porpoise::String.get(name) }
           }
           begin
@@ -178,7 +183,7 @@ module ActiveSupport
         @slc ||= {}
         @slt ||= {}
         v = @slc.fetch(name, nil)
-        
+
         # Remove dead items
         if v && (@slt[name] + SHORT_LIFE_CACHE_TIME) < Time.now.to_i
           @slc.delete(name)
@@ -197,7 +202,7 @@ module ActiveSupport
       def short_mem_del(name)
         @slc ||= {}
         @slt ||= {}
-        
+
         @slc.delete(name)
         @slt.delete(name)
       end
