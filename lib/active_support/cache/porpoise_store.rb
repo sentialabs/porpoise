@@ -27,7 +27,7 @@ module ActiveSupport
 
           deleted_items_count = 1
           while deleted_items_count > 0 do
-            deleted_items_count = ActiveRecord::Base.connection.send(:delete, sanitized_query)
+            deleted_items_count = Porpoise::KeyValueObject.connection.send(:delete, sanitized_query)
             total_deleted_items_count += deleted_items_count
           end
         end
