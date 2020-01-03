@@ -116,6 +116,13 @@ describe ActiveSupport::Cache::PorpoiseStore do
     expect(cache.read('foo_not_expiring_2')).to eql('bar_not_expiring_2')
   end
 
+  it 'uses the database connection of Porpoise::KeyValueObject when cleaning expired items' do
+    expect(Porpoise::KeyValueObject).to receive(:connection).and_call_original
+
+    cache = ActiveSupport::Cache::PorpoiseStore.new({ namespace: 'porpoise-test8' })
+    cache.cleanup
+  end
+
   it "can fetch an item from cache with a block and set an expiration date" do
     cache = ActiveSupport::Cache::PorpoiseStore.new({ namespace: 'porpoise-test9' })
     expect(cache.fetch('faz', expires_in: 1.hour) { 'baz' }).to eql('baz')
