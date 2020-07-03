@@ -19,15 +19,24 @@ describe ActiveSupport::Cache::PorpoiseStore do
   it "can decrement a cached value" do
     cache = ActiveSupport::Cache::PorpoiseStore.new({ namespace: 'porpoise-test2' })
     cache.write('foo', 6)
-    cache.decrement('foo', 4)
+    decrement_result = cache.decrement('foo', 4)
+    expect(decrement_result).to eql(2)
     expect(cache.read('foo')).to eql(2)
   end
 
   it "can increment a cached value" do
     cache = ActiveSupport::Cache::PorpoiseStore.new({ namespace: 'porpoise-test3' })
     cache.write('foo', 6)
-    cache.increment('foo', 3)
+    increment_result = cache.increment('foo', 3)
+    expect(increment_result).to eql(9)
     expect(cache.read('foo')).to eql(9)
+  end
+
+  it "can increment an entry that does not exist (by first initializing to 0)" do
+    cache = ActiveSupport::Cache::PorpoiseStore.new({ namespace: 'porpoise-test3b' })
+    increment_result = cache.increment('foo', 3)
+    expect(increment_result).to eql(3)
+    expect(cache.read('foo')).to eql(3)
   end
 
   it "can delete items from cache" do

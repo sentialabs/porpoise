@@ -49,6 +49,7 @@ module ActiveSupport
           v = read(name)
           v = v.to_i - amount.to_i
           write(name, v, options)
+          v
         }
       end
 
@@ -99,6 +100,7 @@ module ActiveSupport
           v = read(name)
           v = v.to_i + amount.to_i
           write(name, v, options)
+          v
         }
       end
 
