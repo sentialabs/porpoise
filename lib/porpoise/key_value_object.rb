@@ -15,7 +15,7 @@ class Porpoise::KeyValueObject < ActiveRecord::Base
 
   # :nocov:
   unless ENV['rack_env'] && ENV['rack_env'].eql?('test')
-    config = YAML.load(File.read('config/database.yml'))
+    config = YAML.load(ERB.new(File.read('config/database.yml')).result)
     establish_connection config["porpoise_#{Rails.env}"]
   end
   # :nocov:
